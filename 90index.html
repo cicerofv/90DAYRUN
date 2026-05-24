@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>90 Day Run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --p1:#E24B4A;--p1l:#FCEBEB;--p1d:#A32D2D;
+  --p2:#185FA5;--p2l:#E6F1FB;--p2d:#0C447C;
+  --gold:#C89B2A;--silver:#7A8FA6;
+  --bg:#ffffff;--bg2:#F5F5F3;--bg3:#EEEDE9;
+  --txt:#1A1A18;--txt2:#6B6B67;--txt3:#9A9A95;
+  --brd:rgba(0,0,0,0.1);--brd2:rgba(0,0,0,0.18);
+  --rad:14px;--radm:9px;--rads:6px;
+  --shadow:0 2px 16px rgba(0,0,0,0.08);
+  --font-disp:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1A1A18;--bg2:#242422;--bg3:#2C2C2A;
+  --txt:#F0EFE9;--txt2:#9A9A95;--txt3:#6B6B67;
+  --brd:rgba(255,255,255,0.1);--brd2:rgba(255,255,255,0.18);
+  --shadow:0 2px 16px rgba(0,0,0,0.4);
+}}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);background:var(--bg3);color:var(--txt);font-size:15px;line-height:1.5}
+
+/* ── LAYOUT ─────────────────────────────── */
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#topbar{flex-shrink:0;display:none;height:54px;background:var(--bg);border-bottom:0.5px solid var(--brd);padding:0 16px;align-items:center;justify-content:space-between;z-index:50}
+#topbar.show{display:flex}
+#main{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:80px}
+.screen.active{display:block}
+#botnav{flex-shrink:0;display:none;height:66px;background:var(--bg);border-top:0.5px solid var(--brd);align-items:stretch;z-index:50}
+#botnav.show{display:flex}
+
+/* ── SELECT SCREEN ──────────────────────── */
+#scr-select{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;padding:24px;background:var(--bg3);overflow-y:auto;padding-bottom:40px}
+#scr-select.active{display:flex}
+.logo{font-family:var(--font-disp);font-size:clamp(52px,14vw,80px);letter-spacing:0.02em;color:var(--txt);line-height:0.95;text-align:center}
+.logo-sub{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--txt2);text-align:center}
+.day-pill{background:var(--bg);border:0.5px solid var(--brd2);border-radius:999px;padding:5px 16px;font-size:13px;color:var(--txt2)}
+.player-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px}
+.pcard{background:var(--bg);border-radius:var(--rad);border:2px solid transparent;padding:20px 14px;text-align:center;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;box-shadow:var(--shadow)}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(0,0,0,0.12)}
+.pcard:active{transform:scale(0.97)}
+.pcard.p1{border-color:var(--p1)}
+.pcard.p2{border-color:var(--p2)}
+.pcard-av{width:56px;height:56px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-disp);font-size:22px;letter-spacing:0.04em}
+.pcard.p1 .pcard-av{background:var(--p1l);color:var(--p1)}
+.pcard.p2 .pcard-av{background:var(--p2l);color:var(--p2)}
+.pcard-name{font-family:var(--font-disp);font-size:22px;letter-spacing:0.04em}
+.pcard.p1 .pcard-name{color:var(--p1)}
+.pcard.p2 .pcard-name{color:var(--p2)}
+.pcard-pts{font-size:12px;color:var(--txt2);margin-top:4px}
+.setup-link{font-size:13px;color:var(--txt2);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-family:var(--font-body)}
+.setup-link:hover{color:var(--txt)}
+
+/* ── TOP BAR ────────────────────────────── */
+.tb-left{display:flex;align-items:center;gap:10px;cursor:pointer}
+.tb-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-disp);font-size:12px;letter-spacing:0.03em}
+.tb-name{font-size:14px;font-weight:500}
+.tb-day{font-size:12px;color:var(--txt2)}
+.tb-right{display:flex;gap:8px}
+.tb-btn{background:none;border:0.5px solid var(--brd2);border-radius:999px;padding:5px 13px;font-size:12px;font-family:var(--font-body);color:var(--txt);cursor:pointer}
+.tb-btn:hover{background:var(--bg2)}
+
+/* ── NAV ────────────────────────────────── */
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;font-family:var(--font-body);font-size:10px;color:var(--txt2);transition:color 0.15s;padding:6px 4px;letter-spacing:0.02em}
+.nav-item i{font-size:22px;line-height:1}
+.nav-item.act-p1{color:var(--p1)}
+.nav-item.act-p2{color:var(--p2)}
+
+/* ── CARD ───────────────────────────────── */
+.card{background:var(--bg);border:0.5px solid var(--brd);border-radius:var(--rad);box-shadow:var(--shadow)}
+
+/* ── PAGE HEADER ────────────────────────── */
+.ph{padding:20px 16px 4px}
+.ph-title{font-family:var(--font-disp);font-size:32px;letter-spacing:0.03em;color:var(--txt)}
+.ph-sub{font-size:12px;color:var(--txt2);text-transform:uppercase;letter-spacing:0.06em}
+
+/* ── RACE ───────────────────────────────── */
+.race-hero{text-align:center;padding:24px 16px 12px}
+.race-hero-title{font-family:var(--font-disp);font-size:48px;letter-spacing:0.03em}
+.race-hero-sub{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--txt2);margin-top:2px}
+.race-bars{padding:16px}
+.race-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.race-row:last-child{margin-bottom:0}
+.race-init{font-family:var(--font-disp);font-size:13px;letter-spacing:0.04em;width:26px;text-align:center}
+.rbar-wrap{flex:1;height:32px;background:var(--bg2);border-radius:5px;overflow:hidden}
+.rbar{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;transition:width 0.7s cubic-bezier(.4,0,.2,1);min-width:32px}
+.rbar span{font-family:var(--font-disp);font-size:13px;color:#fff;letter-spacing:0.03em}
+.race-total{font-family:var(--font-disp);font-size:20px;width:56px;text-align:right}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px}
+.scard{background:var(--bg2);border-radius:var(--radm);padding:14px}
+.scard-lbl{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px}
+.scard-val{font-family:var(--font-disp);font-size:30px;letter-spacing:0.02em;line-height:1}
+.scard-val sub{font-family:var(--font-body);font-size:12px;color:var(--txt2);margin-left:2px;font-style:normal}
+.lb-title{padding:4px 16px 8px;font-family:var(--font-disp);font-size:20px;letter-spacing:0.03em}
+.lb-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:0.5px solid var(--brd)}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-family:var(--font-disp);font-size:18px;width:22px}
+.lb-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-disp);font-size:13px;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-detail{font-size:12px;color:var(--txt2)}
+.lb-pts{font-family:var(--font-disp);font-size:22px}
+
+/* ── TODAY ──────────────────────────────── */
+.today-wrap{padding:0 16px 16px}
+.today-head{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 12px}
+.today-date{font-size:13px;color:var(--txt2)}
+.today-ptsbadge{font-size:12px;padding:4px 12px;border-radius:999px;font-weight:500}
+.habit-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid var(--brd)}
+.habit-row:last-child{border-bottom:none}
+.hcheck{width:28px;height:28px;border-radius:50%;border:2px solid var(--brd2);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;flex-shrink:0}
+.hcheck.done{border-color:transparent}
+.hcheck i{font-size:14px;color:#fff}
+.habit-info{flex:1}
+.habit-name{font-size:14px;font-weight:500}
+.habit-pts-lbl{font-size:12px;color:var(--txt2)}
+.notes-area{width:100%;min-height:90px;resize:vertical;background:var(--bg2);border:0.5px solid var(--brd2);border-radius:var(--radm);padding:12px;font-size:14px;color:var(--txt);font-family:var(--font-body);outline:none;transition:border-color 0.15s;margin-top:4px}
+.notes-area:focus{border-color:var(--brd2)}
+.save-btn{width:100%;padding:14px;border:none;border-radius:var(--radm);font-size:15px;font-weight:500;cursor:pointer;color:#fff;font-family:var(--font-body);letter-spacing:0.02em;transition:opacity 0.15s,transform 0.1s;margin-top:10px}
+.save-btn:hover{opacity:0.88}
+.save-btn:active{transform:scale(0.98)}
+
+/* ── GOALS ──────────────────────────────── */
+.goals-wrap{padding:0 16px 16px;display:grid;gap:10px}
+.goal-card{background:var(--bg);border:0.5px solid var(--brd);border-radius:var(--rad);padding:16px;box-shadow:var(--shadow)}
+.goal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px}
+.goal-title-txt{font-size:15px;font-weight:500;flex:1}
+.goal-badges{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.goal-pct{font-size:11px;padding:3px 10px;border-radius:999px;font-weight:500}
+.goal-edit-btn{background:none;border:none;cursor:pointer;color:var(--txt2);font-size:17px;padding:2px;line-height:1}
+.goal-edit-btn:hover{color:var(--txt)}
+.goal-bar-wrap{height:7px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-bottom:7px}
+.goal-bar-fill{height:100%;border-radius:4px;transition:width 0.6s cubic-bezier(.4,0,.2,1)}
+.goal-meta{font-size:12px;color:var(--txt2)}
+.add-goal-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg);border:1.5px dashed var(--brd2);border-radius:var(--rad);width:100%;padding:16px;cursor:pointer;color:var(--txt2);font-size:14px;font-family:var(--font-body);transition:background 0.15s,color 0.15s}
+.add-goal-btn:hover{background:var(--bg2);color:var(--txt)}
+
+/* ── HISTORY ────────────────────────────── */
+.history-wrap{padding:0 16px 16px;display:grid;gap:10px}
+.hday{background:var(--bg);border:0.5px solid var(--brd);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow)}
+.hday-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:0.5px solid var(--brd)}
+.hday-date{font-size:14px;font-weight:500}
+.hday-pts{font-family:var(--font-disp);font-size:20px;letter-spacing:0.03em}
+.hday-body{padding:12px 16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:4px 10px;border-radius:999px;background:var(--bg2);color:var(--txt2)}
+.chip.done{background:#EAF3DE;color:#3B6D11}
+@media(prefers-color-scheme:dark){.chip.done{background:#173404;color:#97C459}}
+.hday-note{font-size:13px;color:var(--txt2);margin-top:10px;padding-top:10px;border-top:0.5px solid var(--brd);font-style:italic}
+.empty{text-align:center;padding:48px 20px;color:var(--txt2)}
+.empty i{font-size:40px;display:block;margin-bottom:10px;opacity:0.35}
+.empty p{font-size:14px}
+
+/* ── MODALS ─────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:none;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.overlay{align-items:center;padding:20px}}
+.overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--rad) var(--rad) 0 0;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+@media(min-width:600px){.modal{border-radius:var(--rad)}}
+.modal-handle{width:36px;height:4px;background:var(--brd2);border-radius:2px;margin:0 auto 18px;display:block}
+@media(min-width:600px){.modal-handle{display:none}}
+.modal h3{font-family:var(--font-disp);font-size:24px;letter-spacing:0.04em;margin-bottom:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.field input,.field select{width:100%;padding:10px 13px;background:var(--bg2);border:0.5px solid var(--brd2);border-radius:var(--radm);font-size:14px;color:var(--txt);font-family:var(--font-body);outline:none;transition:border-color 0.15s}
+.field input:focus,.field select:focus{border-color:var(--txt2)}
+.mbtns{display:flex;gap:10px;margin-top:18px}
+.mbtn-cancel{flex:1;padding:12px;border:0.5px solid var(--brd2);border-radius:var(--radm);background:none;font-size:14px;font-family:var(--font-body);color:var(--txt);cursor:pointer}
+.mbtn-cancel:hover{background:var(--bg2)}
+.mbtn-ok{flex:2;padding:12px;border:none;border-radius:var(--radm);font-size:14px;font-weight:500;font-family:var(--font-body);color:#fff;cursor:pointer;transition:opacity 0.15s}
+.mbtn-ok:hover{opacity:0.86}
+.habit-setup-row{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.habit-setup-row input{flex:1;padding:9px 10px;background:var(--bg2);border:0.5px solid var(--brd2);border-radius:var(--radm);font-size:13px;color:var(--txt);font-family:var(--font-body);outline:none}
+.habit-setup-row input.pts-in{width:54px;flex:none}
+.habit-rm-btn{background:none;border:none;cursor:pointer;color:var(--txt2);font-size:17px;padding:4px;line-height:1}
+.habit-rm-btn:hover{color:var(--txt)}
+.add-habit-row{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--txt2);font-size:13px;font-family:var(--font-body);padding:4px 0;margin-top:2px}
+.add-habit-row:hover{color:var(--txt)}
+.section-sep{border:none;border-top:0.5px solid var(--brd);margin:18px 0}
+.setup-block-title{font-family:var(--font-disp);font-size:16px;letter-spacing:0.04em;margin-bottom:12px;color:var(--txt2)}
+
+/* ── UTIL ───────────────────────────────── */
+.pad{padding:0 16px 8px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SELECT SCREEN (outside main/topbar/botnav) -->
+  <div id="scr-select" class="active">
+    <div class="logo">90 DAY<br>RUN</div>
+    <div class="logo-sub">Two players. One race. 90 days.</div>
+    <div class="day-pill" id="sel-day">Day 1 of 90</div>
+    <div class="player-grid" id="player-grid"></div>
+    <button class="setup-link" onclick="openSetup()">⚙&nbsp; Setup names, dates &amp; habits</button>
+  </div>
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="tb-left" onclick="showSelect()">
+      <div class="tb-av" id="tb-av"></div>
+      <div>
+        <div class="tb-name" id="tb-name"></div>
+        <div class="tb-day" id="tb-day"></div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="switchPlayer()">Switch</button>
+      <button class="tb-btn" onclick="openSetup()"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px"></i></button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- RACE -->
+    <div id="scr-race" class="screen">
+      <div class="race-hero">
+        <div class="race-hero-title">RACE</div>
+        <div class="race-hero-sub">Live standings</div>
+      </div>
+      <div class="card" style="margin:0 16px 14px">
+        <div class="race-bars" id="race-bars"></div>
+      </div>
+      <div class="stat-grid" id="race-stats"></div>
+      <div class="card" style="margin:0 16px 14px" id="lb-card">
+        <div class="lb-title">Leaderboard</div>
+        <div id="lb-body"></div>
+      </div>
+      <div class="stat-grid" id="streak-stats"></div>
+    </div>
+
+    <!-- TODAY -->
+    <div id="scr-today" class="screen">
+      <div class="ph">
+        <div class="ph-title" id="today-ph-title">Today</div>
+        <div class="ph-sub" id="today-ph-sub"></div>
+      </div>
+      <div class="today-head">
+        <span class="today-date" id="today-date-lbl"></span>
+        <span class="today-ptsbadge" id="today-pts-badge"></span>
+      </div>
+      <div class="card" style="margin:0 16px 14px" id="habits-card"></div>
+      <div class="today-wrap">
+        <textarea class="notes-area" id="log-notes" placeholder="Notes — what did you do today?"></textarea>
+        <button class="save-btn" id="save-btn" onclick="saveLog()">Save day</button>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div id="scr-goals" class="screen">
+      <div class="ph"><div class="ph-title" id="goals-ph-title">Goals</div></div>
+      <div class="goals-wrap" id="goals-wrap"></div>
+      <div style="padding:0 16px 16px">
+        <button class="add-goal-btn" onclick="openAddGoal()">
+          <i class="ti ti-plus" style="font-size:18px"></i> Add a goal
+        </button>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="scr-history" class="screen">
+      <div class="ph"><div class="ph-title" id="history-ph-title">History</div></div>
+      <div class="history-wrap" id="history-wrap" style="padding-top:12px"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav id="botnav" role="navigation" aria-label="Main">
+    <button class="nav-item" id="nav-race" onclick="showTab('race')">
+      <i class="ti ti-trophy"></i>Race
+    </button>
+    <button class="nav-item" id="nav-today" onclick="showTab('today')">
+      <i class="ti ti-calendar-check"></i>Today
+    </button>
+    <button class="nav-item" id="nav-goals" onclick="showTab('goals')">
+      <i class="ti ti-target"></i>Goals
+    </button>
+    <button class="nav-item" id="nav-history" onclick="showTab('history')">
+      <i class="ti ti-history"></i>History
+    </button>
+  </nav>
+
+</div>
+
+<!-- SETUP MODAL -->
+<div class="overlay" id="setup-overlay" onclick="overlayClose(event,'setup-overlay')">
+<div class="modal" onclick="event.stopPropagation()">
+  <span class="modal-handle"></span>
+  <h3>Setup</h3>
+
+  <div class="setup-block-title">Players</div>
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <div style="flex:1"><div class="field" style="margin:0">
+      <label><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--p1);margin-right:4px;vertical-align:1px"></span>Player 1</label>
+      <input id="su-p1" placeholder="Name"/>
+    </div></div>
+    <div style="flex:1"><div class="field" style="margin:0">
+      <label><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--p2);margin-right:4px;vertical-align:1px"></span>Player 2</label>
+      <input id="su-p2" placeholder="Name"/>
+    </div></div>
+  </div>
+
+  <hr class="section-sep"/>
+  <div class="setup-block-title">90 Day Window</div>
+  <div class="field">
+    <label>Start date</label>
+    <input type="date" id="su-start"/>
+  </div>
+
+  <hr class="section-sep"/>
+  <div class="setup-block-title">Daily habits & points</div>
+  <div id="habit-editor"></div>
+  <button class="add-habit-row" onclick="addHabitRow()">
+    <i class="ti ti-plus" style="font-size:15px"></i> Add habit
+  </button>
+
+  <div class="mbtns">
+    <button class="mbtn-cancel" onclick="closeModal('setup-overlay')">Cancel</button>
+    <button class="mbtn-ok" id="su-save-btn" onclick="saveSetup()">Save setup</button>
+  </div>
+</div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="overlay" id="goal-overlay" onclick="overlayClose(event,'goal-overlay')">
+<div class="modal" onclick="event.stopPropagation()">
+  <span class="modal-handle"></span>
+  <h3 id="goal-modal-title">Add goal</h3>
+  <div class="field"><label>Goal name</label><input id="gm-name" placeholder="e.g. Run 100 miles"/></div>
+  <div style="display:flex;gap:10px">
+    <div class="field" style="flex:1"><label>Target</label><input id="gm-target" type="number" placeholder="100"/></div>
+    <div class="field" style="flex:1"><label>Unit</label><input id="gm-unit" placeholder="miles"/></div>
+  </div>
+  <div class="field"><label>Current progress</label><input id="gm-current" type="number" placeholder="0"/></div>
+  <div class="mbtns">
+    <button class="mbtn-cancel" onclick="closeModal('goal-overlay')">Cancel</button>
+    <button class="mbtn-ok" id="gm-save-btn" onclick="saveGoal()">Add goal</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+const SKEY='run90_v5';
+let S={
+  players:[{name:'Player 1'},{name:'Player 2'}],
+  startDate:new Date().toISOString().slice(0,10),
+  habits:[
+    {id:'h1',name:'Workout',pts:10},
+    {id:'h2',name:'Healthy eating',pts:5},
+    {id:'h3',name:'8hrs sleep',pts:5},
+    {id:'h4',name:'Drink water (2L)',pts:5},
+  ],
+  logs:{p1:{},p2:{}},
+  goals:{p1:[],p2:[]},
+};
+let CP='p1'; // current player
+let CT='race'; // current tab
+let editGoalIdx=null;
+
+function load(){try{const d=localStorage.getItem(SKEY);if(d){const p=JSON.parse(d);S={...S,...p};if(!S.logs)S.logs={p1:{},p2:{}};if(!S.logs.p1)S.logs.p1={};if(!S.logs.p2)S.logs.p2={};if(!S.goals)S.goals={p1:[],p2:[]};if(!S.goals.p1)S.goals.p1=[];if(!S.goals.p2)S.goals.p2=[];}}catch(e){}}
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){}}
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function dayNum(){
+  const s=new Date(S.startDate),t=new Date();
+  return Math.max(1,Math.min(90,Math.floor((t-s)/(864e5))+1));
+}
+function totalPts(pid){return Object.values(S.logs[pid]||{}).reduce((a,l)=>a+(l.pts||0),0)}
+function daysLogged(pid){return Object.keys(S.logs[pid]||{}).filter(d=>(S.logs[pid][d].pts||0)>0).length}
+function streak(pid){
+  let s=0;const today=new Date();
+  for(let i=0;i<90;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const l=(S.logs[pid]||{})[ds];
+    if(l&&(l.pts||0)>0)s++;
+    else if(i>0)break;
+  }
+  return s;
+}
+function initials(name){return name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?'}
+function accent(pid){return pid==='p1'?'var(--p1)':'var(--p2)'}
+function accentL(pid){return pid==='p1'?'var(--p1l)':'var(--p2l)'}
+function pname(pid){return S.players[pid==='p1'?0:1].name}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+function showSelect(){
+  document.getElementById('scr-select').classList.add('active');
+  document.getElementById('topbar').classList.remove('show');
+  document.getElementById('botnav').classList.remove('show');
+  document.querySelectorAll('#main .screen').forEach(s=>s.classList.remove('active'));
+  renderSelect();
+}
+function selectPlayer(pid){
+  CP=pid;
+  document.getElementById('scr-select').classList.remove('active');
+  document.getElementById('topbar').classList.add('show');
+  document.getElementById('botnav').classList.add('show');
+  updateTopbar();
+  showTab(CT);
+}
+function switchPlayer(){
+  CP=CP==='p1'?'p2':'p1';
+  updateTopbar();
+  renderTab();
+}
+function showTab(tab){
+  CT=tab;
+  document.querySelectorAll('#main .screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('scr-'+tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    b.classList.remove('act-p1','act-p2');
+    if(b.id==='nav-'+tab) b.classList.add(CP==='p1'?'act-p1':'act-p2');
+  });
+  renderTab();
+}
+function renderTab(){
+  updateTopbar();
+  if(CT==='race') renderRace();
+  else if(CT==='today') renderToday();
+  else if(CT==='goals') renderGoals();
+  else if(CT==='history') renderHistory();
+}
+
+function updateTopbar(){
+  const av=document.getElementById('tb-av');
+  const ini=initials(pname(CP));
+  av.textContent=ini;
+  av.style.background=accentL(CP);
+  av.style.color=accent(CP);
+  document.getElementById('tb-name').textContent=pname(CP);
+  document.getElementById('tb-day').textContent='Day '+dayNum()+' of 90';
+  document.getElementById('su-save-btn').style.background=accent(CP);
+  document.getElementById('gm-save-btn').style.background=accent(CP);
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    b.classList.remove('act-p1','act-p2');
+    if(b.id==='nav-'+CT) b.classList.add(CP==='p1'?'act-p1':'act-p2');
+  });
+}
+
+// ── SELECT ─────────────────────────────────────────────────────────
+function renderSelect(){
+  const d=dayNum();
+  document.getElementById('sel-day').textContent='Day '+d+' of 90';
+  document.getElementById('player-grid').innerHTML=['p1','p2'].map(pid=>{
+    const pts=totalPts(pid);
+    return `<div class="pcard ${pid}" onclick="selectPlayer('${pid}')">
+      <div class="pcard-av">${initials(pname(pid))}</div>
+      <div class="pcard-name">${pname(pid)}</div>
+      <div class="pcard-pts">${pts} pts total</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RACE ───────────────────────────────────────────────────────────
+function renderRace(){
+  const p1=totalPts('p1'),p2=totalPts('p2');
+  const mx=Math.max(p1,p2,1);
+  document.getElementById('race-bars').innerHTML=['p1','p2'].map(pid=>{
+    const pts=pid==='p1'?p1:p2;
+    const pct=Math.round((pts/mx)*100);
+    const ini=initials(pname(pid));
+    return `<div class="race-row">
+      <div class="race-init" style="color:${accent(pid)}">${ini}</div>
+      <div class="rbar-wrap">
+        <div class="rbar" style="width:${Math.max(pct,6)}%;background:${accent(pid)}">
+          <span>${pts}</span>
+        </div>
+      </div>
+      <div class="race-total" style="color:${accent(pid)}">${pts}</div>
+    </div>`;
+  }).join('');
+  const d=dayNum();
+  document.getElementById('race-stats').innerHTML=`
+    <div class="scard"><div class="scard-lbl">Current day</div><div class="scard-val">${d}<sub>/ 90</sub></div></div>
+    <div class="scard"><div class="scard-lbl">Days left</div><div class="scard-val">${90-d}</div></div>
+    <div class="scard"><div class="scard-lbl">${pname('p1')} streak</div><div class="scard-val" style="color:var(--p1)">${streak('p1')}<sub>days</sub></div></div>
+    <div class="scard"><div class="scard-lbl">${pname('p2')} streak</div><div class="scard-val" style="color:var(--p2)">${streak('p2')}<sub>days</sub></div></div>`;
+  const lead=p1>=p2?{pid:'p1',pts:p1}:{pid:'p2',pts:p2};
+  const trail=p1<p2?{pid:'p1',pts:p1}:{pid:'p2',pts:p2};
+  const diff=Math.abs(p1-p2);
+  document.getElementById('lb-body').innerHTML=[lead,trail].map((pl,i)=>{
+    const dl=daysLogged(pl.pid);
+    return `<div class="lb-row">
+      <div class="lb-rank" style="color:${i===0?'var(--gold)':'var(--silver)'}">${i+1}</div>
+      <div class="lb-av" style="background:${accentL(pl.pid)};color:${accent(pl.pid)}">${initials(pname(pl.pid))}</div>
+      <div class="lb-info">
+        <div class="lb-name">${pname(pl.pid)}</div>
+        <div class="lb-detail">${dl} days logged${i===0&&diff>0?' &middot; leads by '+diff+' pts':''}</div>
+      </div>
+      <div class="lb-pts" style="color:${accent(pl.pid)}">${pl.pts}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('streak-stats').innerHTML=`
+    <div class="scard"><div class="scard-lbl">${pname('p1')} days logged</div><div class="scard-val" style="color:var(--p1)">${daysLogged('p1')}</div></div>
+    <div class="scard"><div class="scard-lbl">${pname('p2')} days logged</div><div class="scard-val" style="color:var(--p2)">${daysLogged('p2')}</div></div>`;
+}
+
+// ── TODAY ──────────────────────────────────────────────────────────
+function renderToday(){
+  const pid=CP;
+  const ac=accent(pid),acl=accentL(pid);
+  document.getElementById('today-ph-title').textContent=pname(pid)+"'s Log";
+  document.getElementById('today-ph-sub').textContent='Daily habits';
+  const ds=todayStr();
+  if(!S.logs[pid]) S.logs[pid]={};
+  const log=S.logs[pid][ds]||{habits:{},notes:'',pts:0};
+  const maxPts=S.habits.reduce((s,h)=>s+(h.pts||5),0);
+  const earned=S.habits.reduce((s,h)=>s+(log.habits&&log.habits[h.id]?(h.pts||5):0),0);
+  const dateDisp=new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  document.getElementById('today-date-lbl').textContent=dateDisp;
+  document.getElementById('today-pts-badge').textContent=earned+' / '+maxPts+' pts';
+  document.getElementById('today-pts-badge').style.background=acl;
+  document.getElementById('today-pts-badge').style.color=ac;
+  document.getElementById('habits-card').innerHTML=S.habits.map(h=>{
+    const done=!!(log.habits&&log.habits[h.id]);
+    return `<div class="habit-row">
+      <div class="hcheck${done?' done':''}" id="hc-${h.id}" onclick="toggleHabit('${h.id}')" style="${done?'background:'+ac+';border-color:'+ac:''}">
+        ${done?`<i class="ti ti-check"></i>`:''}
+      </div>
+      <div class="habit-info">
+        <div class="habit-name">${h.name}</div>
+        <div class="habit-pts-lbl">+${h.pts||5} pts</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('log-notes').value=log.notes||'';
+  document.getElementById('save-btn').style.background=ac;
+  document.getElementById('save-btn').textContent='Save day';
+}
+function toggleHabit(hid){
+  const pid=CP,ds=todayStr();
+  if(!S.logs[pid]) S.logs[pid]={};
+  if(!S.logs[pid][ds]) S.logs[pid][ds]={habits:{},notes:'',pts:0};
+  const log=S.logs[pid][ds];
+  if(!log.habits) log.habits={};
+  log.habits[hid]=!log.habits[hid];
+  log.pts=S.habits.reduce((s,h)=>s+(log.habits[h.id]?(h.pts||5):0),0);
+  const done=log.habits[hid];
+  const ac=accent(pid);
+  const el=document.getElementById('hc-'+hid);
+  el.className='hcheck'+(done?' done':'');
+  el.style=done?`background:${ac};border-color:${ac}`:'';
+  el.innerHTML=done?`<i class="ti ti-check"></i>`:'';
+  const maxPts=S.habits.reduce((s,h)=>s+(h.pts||5),0);
+  const badge=document.getElementById('today-pts-badge');
+  badge.textContent=log.pts+' / '+maxPts+' pts';
+  badge.style.background=accentL(pid);
+  badge.style.color=ac;
+}
+function saveLog(){
+  const pid=CP,ds=todayStr();
+  if(!S.logs[pid]) S.logs[pid]={};
+  if(!S.logs[pid][ds]) S.logs[pid][ds]={habits:{},notes:'',pts:0};
+  S.logs[pid][ds].notes=document.getElementById('log-notes').value;
+  save();
+  const btn=document.getElementById('save-btn');
+  btn.textContent='✓ Saved!';
+  setTimeout(()=>btn.textContent='Save day',1800);
+}
+
+// ── GOALS ──────────────────────────────────────────────────────────
+function renderGoals(){
+  const pid=CP;
+  document.getElementById('goals-ph-title').textContent=pname(pid)+"'s Goals";
+  const goals=S.goals[pid]||[];
+  const ac=accent(pid),acl=accentL(pid);
+  if(!goals.length){
+    document.getElementById('goals-wrap').innerHTML=`<div class="empty"><i class="ti ti-target"></i><p>No goals yet — add one below.</p></div>`;
+    return;
+  }
+  document.getElementById('goals-wrap').innerHTML=goals.map((g,i)=>{
+    const pct=Math.min(100,Math.round(((g.current||0)/(g.target||1))*100));
+    const done=pct>=100;
+    return `<div class="goal-card">
+      <div class="goal-head">
+        <div class="goal-title-txt">${g.name}</div>
+        <div class="goal-badges">
+          ${done?`<span class="goal-pct" style="background:#EAF3DE;color:#3B6D11">Done!</span>`:
+                  `<span class="goal-pct" style="background:${acl};color:${ac}">${pct}%</span>`}
+          <button class="goal-edit-btn" onclick="openEditGoal(${i})" aria-label="Edit goal"><i class="ti ti-edit"></i></button>
+        </div>
+      </div>
+      <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:${pct}%;background:${ac}"></div></div>
+      <div class="goal-meta">${g.current||0} / ${g.target} ${g.unit||''}</div>
+    </div>`;
+  }).join('');
+}
+function openAddGoal(){
+  editGoalIdx=null;
+  document.getElementById('goal-modal-title').textContent='Add goal';
+  document.getElementById('gm-name').value='';
+  document.getElementById('gm-target').value='';
+  document.getElementById('gm-unit').value='';
+  document.getElementById('gm-current').value='0';
+  document.getElementById('gm-save-btn').textContent='Add goal';
+  document.getElementById('gm-save-btn').style.background=accent(CP);
+  openModal('goal-overlay');
+}
+function openEditGoal(i){
+  editGoalIdx=i;
+  const g=S.goals[CP][i];
+  document.getElementById('goal-modal-title').textContent='Edit goal';
+  document.getElementById('gm-name').value=g.name;
+  document.getElementById('gm-target').value=g.target;
+  document.getElementById('gm-unit').value=g.unit||'';
+  document.getElementById('gm-current').value=g.current||0;
+  document.getElementById('gm-save-btn').textContent='Save changes';
+  document.getElementById('gm-save-btn').style.background=accent(CP);
+  openModal('goal-overlay');
+}
+function saveGoal(){
+  const pid=CP;
+  if(!S.goals[pid]) S.goals[pid]=[];
+  const g={
+    name:document.getElementById('gm-name').value||'Goal',
+    target:parseFloat(document.getElementById('gm-target').value)||100,
+    unit:document.getElementById('gm-unit').value,
+    current:parseFloat(document.getElementById('gm-current').value)||0,
+  };
+  if(editGoalIdx!==null) S.goals[pid][editGoalIdx]=g;
+  else S.goals[pid].push(g);
+  save();
+  closeModal('goal-overlay');
+  renderGoals();
+}
+
+// ── HISTORY ────────────────────────────────────────────────────────
+function renderHistory(){
+  const pid=CP;
+  document.getElementById('history-ph-title').textContent=pname(pid)+"'s History";
+  const logs=S.logs[pid]||{};
+  const days=Object.keys(logs).sort((a,b)=>b.localeCompare(a));
+  if(!days.length){
+    document.getElementById('history-wrap').innerHTML=`<div class="empty"><i class="ti ti-history"></i><p>Nothing logged yet — head to Today to start!</p></div>`;
+    return;
+  }
+  const ac=accent(pid);
+  document.getElementById('history-wrap').innerHTML=days.map(ds=>{
+    const log=logs[ds];
+    const d=new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const chips=S.habits.map(h=>{
+      const done=log.habits&&log.habits[h.id];
+      return `<span class="chip${done?' done':''}">${done?'✓ ':''}${h.name}</span>`;
+    }).join('');
+    return `<div class="hday">
+      <div class="hday-head">
+        <span class="hday-date">${d}</span>
+        <span class="hday-pts" style="color:${ac}">+${log.pts||0} pts</span>
+      </div>
+      <div class="hday-body">
+        <div class="chips">${chips}</div>
+        ${log.notes?`<div class="hday-note">${log.notes}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SETUP ──────────────────────────────────────────────────────────
+function openSetup(){
+  document.getElementById('su-p1').value=S.players[0].name;
+  document.getElementById('su-p2').value=S.players[1].name;
+  document.getElementById('su-start').value=S.startDate;
+  document.getElementById('su-save-btn').style.background=accent(CP);
+  renderHabitEditor();
+  openModal('setup-overlay');
+}
+function renderHabitEditor(){
+  document.getElementById('habit-editor').innerHTML=S.habits.map((h,i)=>`
+    <div class="habit-setup-row">
+      <input value="${h.name}" id="he-name-${i}" placeholder="Habit name"/>
+      <input class="pts-in" type="number" value="${h.pts||5}" id="he-pts-${i}" min="1" max="100"/>
+      <span style="font-size:12px;color:var(--txt2)">pts</span>
+      <button class="habit-rm-btn" onclick="removeHabit(${i})" aria-label="Remove"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+function addHabitRow(){
+  S.habits.push({id:'h'+Date.now(),name:'',pts:5});
+  renderHabitEditor();
+  // focus last name input
+  const inputs=document.querySelectorAll('#habit-editor .habit-setup-row input:first-child');
+  if(inputs.length) inputs[inputs.length-1].focus();
+}
+function removeHabit(i){
+  S.habits.splice(i,1);
+  renderHabitEditor();
+}
+function saveSetup(){
+  S.players[0].name=document.getElementById('su-p1').value.trim()||'Player 1';
+  S.players[1].name=document.getElementById('su-p2').value.trim()||'Player 2';
+  S.startDate=document.getElementById('su-start').value||todayStr();
+  S.habits=Array.from(document.querySelectorAll('#habit-editor .habit-setup-row')).map((row,i)=>({
+    id:S.habits[i]?S.habits[i].id:'h'+Date.now()+i,
+    name:document.getElementById('he-name-'+i).value.trim()||'Habit',
+    pts:parseInt(document.getElementById('he-pts-'+i).value)||5,
+  })).filter(h=>h.name);
+  if(!S.habits.length) S.habits=[{id:'h1',name:'Workout',pts:10}];
+  save();
+  closeModal('setup-overlay');
+  if(document.getElementById('scr-select').classList.contains('active')) renderSelect();
+  else renderTab();
+}
+
+// ── MODAL HELPERS ──────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function overlayClose(e,id){if(e.target.id===id) closeModal(id)}
+
+// ── INIT ────────────────────────────────────────────────────────────
+load();
+renderSelect();
+</script>
+</body>
+</html>
